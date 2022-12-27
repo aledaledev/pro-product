@@ -15,12 +15,20 @@ interface CartProps {
   quantity:number,
 }
 
+//hover image info
+//edit quantity
+//cart circle quantity info
+//modular
+
 let products:ProductProps[] = []
 let cart:CartProps[] = []
+let currentPage = 1
 
 export function setProducts(value:any[]){
   products = value.map(({name, _id,category,description,image,price }) => ({name, _id,category,description,image,price})) as ProductProps[]
   render()
+  renderCart()
+  setTotal()
 }
 
 export function setCart(value:CartProps[]){
@@ -50,12 +58,14 @@ const addProduct = (id:string) => {
     setCart(updateCart)
   }
   render()
+  renderCart()
+  setTotal()
 }
 
-const removeProduct = (id:string) => {
+const removeProduct = (id:string,removeAll?:'removeAll') => {
   const {product,quantity} = cart.find(({product}) => product._id===id) as CartProps
 
-  if(quantity===1){
+  if(quantity===1 || removeAll){
     const updateCart = cart.filter(({product}) => product._id!==id)
     setCart(updateCart)
   } else {
@@ -69,6 +79,8 @@ const removeProduct = (id:string) => {
     setCart(updateCart)
   }
   render()
+  renderCart()
+  setTotal()
 }
 
 function render(){
@@ -106,11 +118,14 @@ function render(){
     card.appendChild(cardBody)
 
     addToCart.innerText='add to cart'
-    addToCart.className='btn btn-success'
+    addToCart.className='btn btn-outline-success'
     buttonAdd.innerText='+'
-    buttonAdd.className='btn btn-success'
+    buttonAdd.className='btn btn-outline-primary'
     buttonRemove.innerText='-'
-    buttonRemove.className='btn btn-danger'
+    buttonRemove.className='btn btn-outline-primary'
+    display.className='px-3 d-block border-top border-bottom border-primary'
+    display.style.paddingTop='.4rem'
+    display.style.paddingBottom='.4rem'
     display.textContent=String(quantity)
 
     if(quantity===0){
@@ -123,6 +138,7 @@ function render(){
       buttonRemove.addEventListener('click',() => removeProduct(id))
       buttonAdd.addEventListener('click',() => addProduct(id))
     }
+    buttonContainer.className="btn-group d-flex align-items-center w-75 mx-auto" 
     cardBody.appendChild(buttonContainer)
 
     card.className="card"
@@ -137,4 +153,111 @@ function render(){
   })
 }
 
-fetchData(1)
+const liPages = document.getElementsByClassName('page-item') as unknown as NodeList
+const nodes = Array.prototype.slice.call(liPages,0) 
+nodes[0].classList.add('active')
+nodes.forEach((element:HTMLUListElement) => element.addEventListener('click',() => setPage(Number(element.textContent))))
+
+function setPage(page:number){
+  if(page===currentPage) return
+  currentPage=page
+  if(page===2){
+    nodes[0].classList.remove('active')
+    nodes[1].classList.add('active')
+  } else {
+    nodes[1].classList.remove('active')
+    nodes[0].classList.add('active')
+  }
+  fetchData(currentPage)
+}
+
+function renderCart(){
+  const cartContainer = document.getElementById('cart') as HTMLDivElement
+  cartContainer.innerText=''
+
+  if(cart.length!==0){
+    cart.map(({product})=> {
+      const {_id:id,image,name,price} = product as ProductProps
+      const quantity = cart.find(({product}) => product._id===id)?.quantity
+      
+      const item = document.createElement('div')
+      const img = document.createElement('img')
+      const productName = document.createElement('p')
+      const productInfo = document.createElement('div')
+      const productPrice = document.createElement('span')
+      const productQuantity = document.createElement('span')
+      const buttonGroup = document.createElement('div')
+      const removeItem = document.createElement('button')
+      const removeIcon = document.createElement('i')
+      const buttonAdd =  document.createElement('button')
+      const buttonRemove = document.createElement('button')
+
+      img.src=image
+      img.className='h-25 me-3'
+      img.style.maxWidth='40px'
+
+      productName.textContent=name
+      productName.style.fontSize='.8rem'
+      productName.className='text-secondary'
+
+      productPrice.textContent=`$${price}`
+      productQuantity.textContent=`x${String(quantity)}`
+      productPrice.className='fw-medium'
+      productQuantity.className='fw-light'
+      productQuantity.style.fontSize='smaller'
+      productInfo.className='d-flex flex-column align-items-end justify-content-center mx-2'
+      productInfo.appendChild(productPrice)
+      productInfo.appendChild(productQuantity)
+
+      buttonAdd.textContent='+'
+      buttonRemove.textContent='-'
+      removeIcon.className='bi bi-trash'
+      removeItem.className='btn btn-outline-danger px-1 py-0'
+      buttonAdd.className='btn btn-outline-primary px-1 py-0'
+      buttonRemove.className='btn btn-outline-primary px-1 py-0'
+      buttonGroup.className='btn-group-vertical'
+      removeItem.appendChild(removeIcon)
+      buttonGroup.appendChild(removeItem)
+      buttonGroup.appendChild(buttonAdd)
+      buttonGroup.appendChild(buttonRemove)
+      buttonRemove.addEventListener('click',() => removeProduct(id))
+      buttonAdd.addEventListener('click',() => addProduct(id))
+      removeItem.addEventListener('click',() => removeProduct(id,'removeAll'))
+
+      item.className='d-flex justify-content-between align-items-center my-1'
+      item.appendChild(img)
+      item.appendChild(productName)
+      item.appendChild(productInfo)
+      item.appendChild(buttonGroup)
+
+      cartContainer.appendChild(item)
+    })
+  } else {
+    const advice = document.createElement('div')
+    const adviceTitle = document.createElement('h4')
+    const icon = document.createElement('i')
+
+    adviceTitle.textContent='Cart is empty'
+    icon.className='bi bi-emoji-smile-upside-down my-1'
+    icon.style.transform='scale(2)'
+
+    advice.className='d-flex align-items-center flex-column'
+    advice.appendChild(adviceTitle)
+    advice.appendChild(icon)
+
+    cartContainer.appendChild(advice)
+  }
+}
+
+let total = 0
+function setTotal(){
+  const totalPrice = document.getElementById('total') as HTMLSpanElement
+  if(cart.length===0){
+    total=0
+  } else { 
+    total = (cart.map(({product,quantity}) => product.price*quantity).reduce((prev,cur)=> prev+cur))
+  }
+  totalPrice.textContent=`$${String(total.toFixed(2))}`
+}
+
+fetchData(currentPage)

@@ -11,11 +11,50 @@
   <body>
     <main>
       <h2 class="m-3">Products</h2>
-      <button id="open-cart" class="position-fixed btn btn-light" style="right: 1rem;top:1rem;"><i class="bi bi-cart"></i></button>
+      <button id="open-cart" class="position-fixed z-1 btn btn-outline-dark" style="right: .75rem;top:1rem;" data-bs-toggle="collapse" data-bs-target="#collapse"><i class="bi bi-cart"></i></button>
+        <div class="position-fixed collapse collapse-vertical z-1" style="right: .75rem;top:1rem;" id="collapse">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between">
+              <h5 class="m-0">Cart</h5>
+              <button class="btn-close" data-bs-target="#collapse" data-bs-toggle="collapse"></button>
+            </div>
+            <div id="cart" class="card-body overflow-scroll" style="width: 275px;max-height: 220px;">
+              
+              <!--<div class="d-flex justify-content-center">
+                <img src="http://peticiones.online/images/products/image07.png" class="w-50 h-25 me-3" alt="meme">
+                <p class="text-secondary">Camisa mangas largas</p>
+                <div class="d-flex flex-column align-items-end justify-content-center mx-2">
+                  <span class="fw-medium fs-5">$21</span>
+                  <span class="fw-light" style="font-size: smaller;">x4</span>
+                </div>
+                <div class="btn-group-vertical" role="group">
+                  <button class="btn btn-outline-danger px-1 py-0"><i class="bi bi-trash"></i></button>
+                  <button class="btn btn-outline-primary px-1 py-0">+</button>
+                  <button class="btn btn-outline-primary px-1 py-0">-</button>
+                </div>
+              </div>-->
+              <!--<div class="d-flex align-items-center flex-column">
+                <h4>Cart is empty</h4>
+                <i class="bi bi-emoji-smile-upside-down my-1" style="transform:scale(2);"></i>
+              </div>-->
+              
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+              <h6 class="m-0 text-uppercase">total</h6>
+              <span id="total"></span>
+            </div>
+          </div>
+        </div>
       <div class="container">        
         <div id="product-container" class="row g-2">
         </div>
       </div>
+      <nav class="mt-3 d-flex justify-content-center">
+        <ul class="pagination mx-auto">
+        <li class="page-item"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        </ul>
+      </nav>
     </main>
     <script type="module" src="/src/main.ts"></script>
     <script src="./src/assets/bootstrap.bundle.min.js"></script>
