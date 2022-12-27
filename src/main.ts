@@ -23,12 +23,61 @@ export function setProducts(value:any[]){
   render()
 }
 
+export function setCart(value:CartProps[]){
+  cart=value
+}
+
+const addProduct = (id:string) => {
+  const inCart = cart.some(({product}) => product._id===id)
+
+  if(inCart) {
+    const {product,quantity} = cart.find(({product}) => product._id===id) as CartProps
+    const productIndex = cart.findIndex(({product}) => product._id===id)
+    const updateCart = [...cart]
+    const productCart = {
+      product,
+      quantity:quantity+1,
+    }
+    updateCart[productIndex]=productCart as CartProps
+    setCart(updateCart)
+  } else {
+    const currentProduct = products.find(product => product._id===id) as ProductProps
+    const productCart = {
+      product:currentProduct,
+      quantity:1,
+    }
+    const updateCart = [...cart, productCart]
+    setCart(updateCart)
+  }
+  render()
+}
+
+const removeProduct = (id:string) => {
+  const {product,quantity} = cart.find(({product}) => product._id===id) as CartProps
+
+  if(quantity===1){
+    const updateCart = cart.filter(({product}) => product._id!==id)
+    setCart(updateCart)
+  } else {
+    const productIndex = cart.findIndex(({product}) => product._id===id)
+    const updateCart = [...cart]
+    const productCart = {
+      product,
+      quantity:quantity-1,
+    }
+    updateCart[productIndex] = productCart
+    setCart(updateCart)
+  }
+  render()
+}
+
 function render(){
   const productsContainer = document.getElementById('product-container') as HTMLDivElement
+  productsContainer.innerText=''
 
   products.map(({name, _id:id,category,description,image,price }) => {
 
-    const {quantity} = cart.find(({product}) => product._id===id) | 0 as CartProps
+    const quantity = cart.find(({product}) => product._id===id)?.quantity | 0
 
     const card = document.createElement('div')
     const img = document.createElement('img')
@@ -62,14 +111,17 @@ function render(){
     buttonAdd.className='btn btn-success'
     buttonRemove.innerText='-'
     buttonRemove.className='btn btn-danger'
-    display.textContent=quantity
+    display.textContent=String(quantity)
 
-    if(quantity!==0){
+    if(quantity===0){
       buttonContainer.appendChild(addToCart)
+      addToCart.addEventListener('click',() => addProduct(id))
     } else {
       buttonContainer.appendChild(buttonRemove)
       buttonContainer.appendChild(display)
       buttonContainer.appendChild(buttonAdd)
+      buttonRemove.addEventListener('click',() => removeProduct(id))
+      buttonAdd.addEventListener('click',() => addProduct(id))
     }
     cardBody.appendChild(buttonContainer)
 
